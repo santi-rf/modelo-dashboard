@@ -1,0 +1,15 @@
+[
+  {
+    "nombre": "GNOME Golfo",
+    "actualizacion": "2025-05-05 18:00",
+    "estado": "running",
+    "modo": "Pronóstico"
+  },
+  {
+    "nombre": "MOHID Campeche",
+    "actualizacion": "2025-05-06 00:00",
+    "estado": "stopped",
+    "modo": "Hindcast"
+  }
+]
+
