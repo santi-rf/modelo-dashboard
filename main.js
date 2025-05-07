@@ -15,9 +15,35 @@ const iconosCategoria = {
   derrames: "fas fa-oil-can",
 };
 
+// Función para cargar los archivos JSON directamente desde GitHub
+async function cargarArchivosJson() {
+  try {
+    const archivosJson = {};
+
+    // URL de los archivos JSON alojados en GitHub
+    const respuestaAtmosfericos = await fetch('https://raw.githubusercontent.com/tu-usuario/tu-repositorio/main/data/atmosfericos.json');
+    const respuestaOceanicos = await fetch('https://raw.githubusercontent.com/tu-usuario/tu-repositorio/main/data/oceanicos.json');
+    const respuestaDerrames = await fetch('https://raw.githubusercontent.com/tu-usuario/tu-repositorio/main/data/derrames.json');
+
+    // Esperar a que todas las respuestas se resuelvan
+    const datosAtmosfericos = await respuestaAtmosfericos.json();
+    const datosOceanicos = await respuestaOceanicos.json();
+    const datosDerrames = await respuestaDerrames.json();
+
+    archivosJson.atmosfericos = datosAtmosfericos;
+    archivosJson.oceanicos = datosOceanicos;
+    archivosJson.derrames = datosDerrames;
+
+    return archivosJson;
+  } catch (error) {
+    console.error("Error al cargar los archivos JSON:", error);
+    throw new Error("No se pudieron cargar los archivos JSON");
+  }
+}
+
+// Función para cargar los modelos en la interfaz
 async function cargarModelos(categoria, contenedorId, archivosJson) {
   try {
-    // Los archivos JSON serán proporcionados a través de un input de tipo file
     const modeloData = archivosJson[categoria]; // acceder a los modelos correspondientes
 
     if (!modeloData) {
@@ -46,6 +72,7 @@ async function cargarModelos(categoria, contenedorId, archivosJson) {
   }
 }
 
+// Inicializar la página cargando los datos JSON y mostrando los modelos
 async function inicializar() {
   const archivosJson = await cargarArchivosJson();
 
@@ -77,44 +104,5 @@ async function inicializar() {
   });
 }
 
-function cargarArchivosJson() {
-  return new Promise((resolve, reject) => {
-    const inputElement = document.createElement("input");
-    inputElement.type = "file";
-    inputElement.accept = ".json";
-    inputElement.multiple = true;
-    inputElement.addEventListener("change", (event) => {
-      const archivos = event.target.files;
-      if (!archivos.length) {
-        reject("No se seleccionaron archivos.");
-        return;
-      }
-
-      const archivosJson = {};
-      let archivosCargados = 0;
-
-      Array.from(archivos).forEach((archivo) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const data = JSON.parse(e.target.result);
-            const categoria = archivo.name.replace(".json", ""); // Nombre del archivo como clave de categoría
-            archivosJson[categoria] = data;
-            archivosCargados += 1;
-
-            if (archivosCargados === archivos.length) {
-              resolve(archivosJson);
-            }
-          } catch (error) {
-            reject("Error al leer el archivo JSON.");
-          }
-        };
-        reader.readAsText(archivo);
-      });
-    });
-
-    inputElement.click();
-  });
-}
-
+// Esperar a que el DOM se cargue completamente antes de inicializar
 document.addEventListener("DOMContentLoaded", inicializar);
